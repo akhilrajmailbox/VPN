@@ -1,0 +1,107 @@
+transport link :: https://www.kerkeni.net/en/configure-l2tp-ipsec-vpn-on-ubuntu-15-10-16-04-to-fortigate-forti-os-5-2.htm
+tunnel link :: https://adosztal.blogspot.in/2017/11/route-based-vpn-fortigate-strongswan.html
+
+
+
+
+
+apt-get install -y strongswan xl2tpd
+nano /etc/ipsec.conf
+
+# ipsec.conf - strongSwan IPsec configuration file
+# basic configuration
+config setup
+#        charondebug="all"
+#        uniqueids=yes
+#        strictcrlpolicy=no
+# strictcrlpolicy=yes
+# uniqueids = no
+# Add connections here.
+# Sample VPN connections
+conn %default
+        ikelifetime=60m
+        keylife=20m
+        rekeymargin=3m
+        keyingtries=1
+        keyexchange=ikev1
+        authby=secret
+conn test_conn
+        keyexchange=ikev1
+        left=%defaultroute
+        leftsubnet=0.0.0.0/0
+        auto=add
+        authby=secret
+        type=tunnel
+        ike=aes256-sha512-modp2048
+        esp=aes256-sha512-modp2048
+        # set this to the ip address of your vpn server
+        right=192.168.1.23
+        rightsubnet=192.168.1.0/0
+
+
+
+nano /etc/ipsec.secrets
+
+# This file holds shared secrets or RSA private keys for authentication.
+
+# RSA private key for this host, authenticating it to any other host
+# which knows the public part.
+
+
+: PSK "xxxxxxxxxxxxxx"
+
+
+
+nano /etc/xl2tpd/xl2tpd.conf
+
+[lac test_conn]
+lns = 192.168.1.23
+ppp debug = yes
+pppoptfile = /etc/ppp/options.l2tpd.client
+length bit = yes
+
+
+
+
+nano /etc/ppp/options.l2tpd.client
+
+
+ipcp-accept-local
+ipcp-accept-remote
+refuse-eap
+require-mschap-v2
+noccp
+noauth
+idle 1800
+mtu 1410
+mru 1410
+defaultroute
+usepeerdns
+debug
+lock
+connect-delay 5000
+
+
+
+
+mkdir -p /var/run/xl2tpd
+touch /var/run/xl2tpd/l2tp-control
+
+
+sudo service strongswan restart
+sudo service xl2tpd restart
+
+
+
+Optional configuration
+echo "c test_conn" >/var/run/xl2tpd/l2tp-control
+route -n
+
+
+ipsec restart
+ipsec statusall
+journalctl -xe
+ipsec up test_conn
+
+
+
