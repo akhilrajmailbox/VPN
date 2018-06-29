@@ -11,6 +11,7 @@ Then add one iptable rules in order to make the ipsec working properly
 #docker network create --driver=bridge --subnet=11.1.1.0/24 --gateway=11.1.1.1 custom_network
 #iptables -t nat -I POSTROUTING -s 11.1.1.0/24 -m policy --dir out --pol ipsec -j ACCEPT
 
+link :: https://wiki.strongswan.org/issues/2167
 ================================
 
 
