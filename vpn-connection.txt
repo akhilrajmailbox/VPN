@@ -1,7 +1,17 @@
 transport link :: https://www.kerkeni.net/en/configure-l2tp-ipsec-vpn-on-ubuntu-15-10-16-04-to-fortigate-forti-os-5-2.htm
 tunnel link :: https://adosztal.blogspot.in/2017/11/route-based-vpn-fortigate-strongswan.html
 
+================================
+specific VPN Configuration
+================================
 
+If we can configuring left subnet other than (0.0.0.0/0), need to create separate network and create docker container with in that network.
+Then add one iptable rules in order to make the ipsec working properly
+
+#docker network create --driver=bridge --subnet=11.1.1.0/24 --gateway=11.1.1.1 custom_network
+#iptables -t nat -I POSTROUTING -s 11.1.1.0/24 -m policy --dir out --pol ipsec -j ACCEPT
+
+================================
 
 
 
